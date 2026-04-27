@@ -21,59 +21,24 @@ if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET is missing in environment variables');
 }
 
-function parseOrigins(value) {
-  return String(value || '')
-    .split(',')
-    .map((origin) => origin.trim().replace(/\/+$/, ''))
-    .filter(Boolean);
-}
-
-const localOrigins = process.env.NODE_ENV === 'production' ? [] : [
-  'http://localhost:5000',
-  'http://127.0.0.1:5000',
-  'http://localhost:5500',
-  'http://127.0.0.1:5500'
-];
-
-const vercelOrigin = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : '';
-
-const allowedOrigins = [
-  ...parseOrigins(process.env.CLIENT_URL),
-  ...parseOrigins(process.env.CLIENT_URLS),
-  ...parseOrigins(process.env.FRONTEND_URL),
-  vercelOrigin,
-  ...localOrigins
-].filter(Boolean);
-
-console.log('Allowed CORS origins:', allowedOrigins);
-
 app.set('query parser', 'simple');
 app.set('trust proxy', 1);
 
 /* ===================== */
-/* ✅ CORS FIX COMPLET */
+/* 🚨 CORS OPEN (DEBUG) */
 /* ===================== */
 
-const corsOptions = {
-  origin(origin, callback) {
-    const normalizedOrigin = origin ? origin.replace(/\/+$/, '') : '';
-
-    if (!origin || allowedOrigins.includes(normalizedOrigin)) {
-      return callback(null, true);
-    }
-
-    console.log('CORS BLOCKED:', normalizedOrigin);
-    return callback(new Error(`Origin not allowed by CORS: ${normalizedOrigin}`));
-  },
+app.use(cors({
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-};
+}));
 
-app.use(cors(corsOptions));
-app.options(/.*/, cors(corsOptions));
+app.options(/.*/, cors({
+  origin: true,
+  credentials: true
+}));
 
 /* ===================== */
 
