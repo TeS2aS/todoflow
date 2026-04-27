@@ -15,6 +15,7 @@ const requestLogger = require('./middleware/requestLogger');
 const { rejectDangerousPayload } = require('./utils/security');
 
 const app = express();
+console.log("🔥 REAL BACKEND SERVER.JS IS RUNNING");
 const PORT = process.env.PORT || 5000;
 
 if (!process.env.JWT_SECRET) {
