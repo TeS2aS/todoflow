@@ -305,6 +305,7 @@ API_URL=https://todoflow-api.onrender.com
 ```
 
 - Redeployer Vercel si la variable a ete modifiee.
+- Ne pas ajouter de slash final aux URL CORS. Pour le deploiement actuel de la capture, Render doit avoir `CLIENT_URL=https://todoflow-alpha.vercel.app` et Vercel doit avoir `API_URL=https://todoflow-qgy1.onrender.com`.
 
 Pour plusieurs domaines frontend, utiliser:
 

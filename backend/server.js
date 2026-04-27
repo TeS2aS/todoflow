@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const path = require('path');
 const express = require('express');
+const cors = require('cors');
 const helmet = require('helmet');
 
 const connectDB = require('./config/db');
@@ -23,35 +24,40 @@ if (!process.env.JWT_SECRET) {
 app.set('query parser', 'simple');
 app.set('trust proxy', 1);
 
-/* ===================== */
-/* ✅ CORS MANUEL FIX */
-/* ===================== */
+function parseOrigins(value) {
+  return String(value || '')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter(Boolean);
+}
 
-app.use((req, res, next) => {
-  const allowedOrigins = [
-    'https://todoflow-alpha.vercel.app',
-    'http://localhost:5000',
-    'http://127.0.0.1:5000'
-  ];
+const allowedOrigins = new Set([
+  'http://localhost:5000',
+  'http://127.0.0.1:5000',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+  ...parseOrigins(process.env.CLIENT_URL),
+  ...parseOrigins(process.env.CLIENT_URLS),
+  ...parseOrigins(process.env.FRONTEND_URL)
+]);
 
-  const origin = req.headers.origin;
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin.replace(/\/+$/, ''))) {
+      return callback(null, true);
+    }
 
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204);
-  }
-
-  next();
-});
-
-/* ===================== */
+    return callback(null, false);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204
+}));
 
 app.use(helmet());
 
