@@ -2,7 +2,6 @@ require('dotenv').config();
 
 const path = require('path');
 const express = require('express');
-const cors = require('cors');
 const helmet = require('helmet');
 
 const connectDB = require('./config/db');
@@ -25,20 +24,32 @@ app.set('query parser', 'simple');
 app.set('trust proxy', 1);
 
 /* ===================== */
-/* 🚨 CORS OPEN (DEBUG) */
+/* ✅ CORS MANUEL FIX */
 /* ===================== */
 
-app.use(cors({
-  origin: true,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    'https://todoflow-alpha.vercel.app',
+    'http://localhost:5000',
+    'http://127.0.0.1:5000'
+  ];
 
-app.options(/.*/, cors({
-  origin: true,
-  credentials: true
-}));
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 
 /* ===================== */
 
