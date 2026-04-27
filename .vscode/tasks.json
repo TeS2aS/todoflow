@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Calculator",
+			"type": "shell",
+			"command": "c:/Users/chank/Documents/dossier famille/testCodex/.venv/Scripts/python.exe",
+			"args": [
+				"calculator.py"
+			],
+			"group": "build"
+		}
+	]
+}

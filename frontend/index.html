@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TodoFlow</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="env.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="app-header">
+    <nav class="nav" aria-label="Navigation principale">
+      <a class="brand" href="#app">TodoFlow</a>
+      <div class="session">
+        <span id="connectionStatus" class="connection-status">Online</span>
+        <span id="userEmail" class="user-email"></span>
+        <button id="themeToggle" class="ghost-button" type="button">Sombre</button>
+        <button id="logoutButton" class="ghost-button hidden" type="button">Deconnexion</button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="app" class="app-shell">
+    <section id="authView" class="auth-layout" aria-labelledby="authTitle">
+      <div class="auth-copy">
+        <p class="eyebrow">Workspace personnel</p>
+        <h1 id="authTitle">Pilotez vos taches avec une vue claire du travail.</h1>
+        <p>Un tableau rapide, securise et pret pour des workflows plus avances.</p>
+      </div>
+
+      <form id="authForm" class="auth-card" novalidate>
+        <div class="tabs" role="tablist" aria-label="Choix authentification">
+          <button id="loginTab" class="tab active" type="button" role="tab" aria-selected="true">Connexion</button>
+          <button id="registerTab" class="tab" type="button" role="tab" aria-selected="false">Inscription</button>
+        </div>
+
+        <div class="field">
+          <label for="authEmail">Email</label>
+          <input id="authEmail" name="email" type="email" autocomplete="email" maxlength="120" required>
+          <p id="emailError" class="error"></p>
+        </div>
+
+        <div class="field">
+          <label for="authPassword">Mot de passe</label>
+          <input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="72" required>
+          <p id="passwordError" class="error"></p>
+        </div>
+
+        <button id="authSubmit" class="primary-button" type="submit">Se connecter</button>
+        <button id="forgotPasswordButton" class="link-button" type="button">Mot de passe oublie</button>
+
+        <div id="resetPanel" class="reset-panel hidden">
+          <div class="field">
+            <label for="resetToken">Token de reset</label>
+            <input id="resetToken" type="text" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="resetPassword">Nouveau mot de passe</label>
+            <input id="resetPassword" type="password" minlength="8" maxlength="72" autocomplete="new-password">
+          </div>
+          <button id="resetPasswordButton" class="secondary-button" type="button">Reinitialiser</button>
+        </div>
+
+        <p id="authStatus" class="status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section id="dashboardView" class="dashboard hidden" aria-labelledby="dashboardTitle">
+      <div class="dashboard-header">
+        <div>
+          <p class="eyebrow">Dashboard</p>
+          <h1 id="dashboardTitle">Mes taches</h1>
+        </div>
+        <div class="header-actions">
+          <button id="notificationButton" class="ghost-button" type="button">Notifications</button>
+          <button id="exportButton" class="ghost-button" type="button">Export JSON</button>
+        </div>
+      </div>
+
+      <section class="stats-grid" aria-label="Statistiques">
+        <article class="stat-card">
+          <span>Total</span>
+          <strong id="totalCount">0</strong>
+          <div class="meter"><span id="totalBar"></span></div>
+        </article>
+        <article class="stat-card">
+          <span>Terminees</span>
+          <strong id="completedCount">0</strong>
+          <div class="meter"><span id="completedBar"></span></div>
+        </article>
+        <article class="stat-card">
+          <span>Productivite</span>
+          <strong id="productivityValue">0%</strong>
+          <div class="meter"><span id="productivityBar"></span></div>
+        </article>
+        <article class="stat-card warning">
+          <span>En retard</span>
+          <strong id="overdueCount">0</strong>
+          <div class="meter"><span id="overdueBar"></span></div>
+        </article>
+      </section>
+
+      <div class="workspace-grid">
+        <aside class="side-panel" aria-label="Assistant intelligent">
+          <section class="panel-block">
+            <div class="panel-heading">
+              <p class="eyebrow">Assistant</p>
+              <button id="aiSuggestButton" class="secondary-button" type="button">Suggester</button>
+            </div>
+            <textarea id="aiInput" rows="3" maxlength="120" placeholder="Tache a reformuler ou prioriser"></textarea>
+            <div class="button-row">
+              <button id="aiRewriteButton" class="ghost-button" type="button">Reformuler</button>
+              <button id="aiPriorityButton" class="ghost-button" type="button">Prioriser</button>
+            </div>
+            <div id="aiResult" class="ai-result" aria-live="polite"></div>
+          </section>
+
+          <section class="panel-block">
+            <div class="panel-heading">
+              <p class="eyebrow">Planning</p>
+              <button id="analysisButton" class="secondary-button" type="button">Analyser</button>
+            </div>
+            <ul id="planningTips" class="tips-list"></ul>
+          </section>
+        </aside>
+
+        <section class="board" aria-label="Tableau des taches">
+          <form id="taskForm" class="task-form" novalidate>
+            <div class="field title-field">
+              <label for="taskTitle">Nouvelle tache</label>
+              <input id="taskTitle" name="title" type="text" maxlength="120" placeholder="Ajouter une tache..." required>
+            </div>
+            <div class="field">
+              <label for="taskPriority">Priorite</label>
+              <select id="taskPriority" name="priority">
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="taskDueDate">Echeance</label>
+              <input id="taskDueDate" name="dueDate" type="datetime-local">
+            </div>
+            <div class="field">
+              <label for="taskCategory">Categorie</label>
+              <input id="taskCategory" name="category" type="text" maxlength="40" placeholder="Projet">
+            </div>
+            <div class="field">
+              <label for="taskTags">Tags</label>
+              <input id="taskTags" name="tags" type="text" maxlength="180" placeholder="client, sprint">
+            </div>
+            <div class="field title-field">
+              <label for="taskDescription">Notes</label>
+              <textarea id="taskDescription" name="description" rows="2" maxlength="600"></textarea>
+            </div>
+            <button class="primary-button form-submit" type="submit">Ajouter</button>
+            <p id="taskError" class="error full-row"></p>
+          </form>
+
+          <div class="filters" aria-label="Filtres">
+            <label class="sr-only" for="searchInput">Recherche</label>
+            <input id="searchInput" type="search" maxlength="80" placeholder="Rechercher...">
+            <select id="statusFilter" aria-label="Statut">
+              <option value="all">Toutes</option>
+              <option value="active">En cours</option>
+              <option value="completed">Terminees</option>
+            </select>
+            <select id="priorityFilter" aria-label="Priorite">
+              <option value="">Priorites</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+            <select id="dueFilter" aria-label="Date">
+              <option value="all">Toutes dates</option>
+              <option value="overdue">En retard</option>
+              <option value="today">Aujourd'hui</option>
+              <option value="upcoming">A venir</option>
+              <option value="none">Sans date</option>
+            </select>
+            <select id="sortSelect" aria-label="Tri">
+              <option value="position">Ordre manuel</option>
+              <option value="-updatedAt">Modifiees</option>
+              <option value="dueDate">Echeance</option>
+              <option value="-priority">Priorite</option>
+            </select>
+          </div>
+
+          <div class="list-topline">
+            <p id="dashboardStatus" class="status" role="status" aria-live="polite"></p>
+            <div class="pagination">
+              <button id="prevPageButton" class="ghost-button" type="button">Precedent</button>
+              <span id="pageLabel">1 / 1</span>
+              <button id="nextPageButton" class="ghost-button" type="button">Suivant</button>
+            </div>
+          </div>
+
+          <ul id="taskList" class="task-list" aria-live="polite"></ul>
+          <p id="emptyState" class="empty-state hidden">Aucune tache a afficher.</p>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div id="toastRoot" class="toast-root" aria-live="polite"></div>
+</body>
+</html>

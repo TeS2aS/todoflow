@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-src 'none'; upgrade-insecure-requests">
+  <title>Contact s&eacute;curis&eacute;</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav" aria-label="Navigation principale">
+      <a class="brand" href="#accueil" aria-label="Accueil ContactPro">ContactPro</a>
+      <ul class="nav-links">
+        <li><a href="#accueil">Accueil</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="accueil">
+      <div class="hero-content">
+        <p class="eyebrow">Site HTML, CSS et JavaScript</p>
+        <h1>Un formulaire de contact clair, valid&eacute; et plus s&ucirc;r.</h1>
+        <p>
+          Cette page utilise des contraintes HTML, une validation JavaScript,
+          une politique CSP et des protections simples contre les soumissions abusives.
+        </p>
+        <a class="button" href="#contact">Remplir le formulaire</a>
+      </div>
+      <div class="hero-panel" aria-label="Apercu du processus">
+        <div class="status-row">
+          <span class="status-dot"></span>
+          <span>Validation active</span>
+        </div>
+        <div class="metric">
+          <span>Champs requis</span>
+          <strong>4</strong>
+        </div>
+        <div class="metric">
+          <span>Protection anti-spam</span>
+          <strong>Oui</strong>
+        </div>
+        <div class="metric">
+          <span>Injection DOM</span>
+          <strong>Bloqu&eacute;e</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="services" id="services" aria-label="Services">
+      <article>
+        <h2>Validation</h2>
+        <p>Les champs sont contr&ocirc;l&eacute;s avant toute action : format email, taille, contenu et cases obligatoires.</p>
+      </article>
+      <article>
+        <h2>S&eacute;curisation</h2>
+        <p>Le script n'utilise ni code dynamique ni insertion HTML depuis les donn&eacute;es utilisateur.</p>
+      </article>
+      <article>
+        <h2>Accessibilit&eacute;</h2>
+        <p>Les erreurs sont affich&eacute;es champ par champ et annonc&eacute;es avec des zones de statut accessibles.</p>
+      </article>
+    </section>
+
+    <section class="contact-section" id="contact">
+      <div class="section-heading">
+        <p class="eyebrow">Contact</p>
+        <h2>Envoyer une demande</h2>
+        <p>Les donn&eacute;es restent dans cette page de d&eacute;monstration. Sur un vrai site, la validation serveur reste obligatoire.</p>
+      </div>
+
+      <form class="contact-form" id="contactForm" action="#" method="post" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="name">Nom complet</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              autocomplete="name"
+              minlength="2"
+              maxlength="80"
+              required
+              aria-describedby="nameError"
+            >
+            <p class="error" id="nameError"></p>
+          </div>
+
+          <div class="field">
+            <label for="email">Adresse email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              maxlength="120"
+              required
+              aria-describedby="emailError"
+            >
+            <p class="error" id="emailError"></p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="phone">T&eacute;l&eacute;phone <span>facultatif</span></label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              autocomplete="tel"
+              inputmode="tel"
+              maxlength="20"
+              aria-describedby="phoneError"
+            >
+            <p class="error" id="phoneError"></p>
+          </div>
+
+          <div class="field">
+            <label for="subject">Sujet</label>
+            <select id="subject" name="subject" required aria-describedby="subjectError">
+              <option value="">Choisir un sujet</option>
+              <option value="devis">Demande de devis</option>
+              <option value="support">Support</option>
+              <option value="partenariat">Partenariat</option>
+              <option value="autre">Autre</option>
+            </select>
+            <p class="error" id="subjectError"></p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="message">Message</label>
+          <textarea
+            id="message"
+            name="message"
+            rows="6"
+            minlength="20"
+            maxlength="800"
+            required
+            aria-describedby="messageHint messageError"
+          ></textarea>
+          <div class="hint-row">
+            <p class="hint" id="messageHint">20 &agrave; 800 caract&egrave;res.</p>
+            <p class="counter" id="messageCounter">0/800</p>
+          </div>
+          <p class="error" id="messageError"></p>
+        </div>
+
+        <div class="field hp-field" aria-hidden="true">
+          <label for="website">Site web</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+
+        <label class="check-row" for="consent">
+          <input id="consent" name="consent" type="checkbox" required aria-describedby="consentError">
+          <span>J'accepte d'&ecirc;tre recontact&eacute; au sujet de ma demande.</span>
+        </label>
+        <p class="error" id="consentError"></p>
+
+        <div class="form-actions">
+          <button class="button" type="submit">Envoyer</button>
+          <button class="secondary-button" type="reset">R&eacute;initialiser</button>
+        </div>
+
+        <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 ContactPro. Page statique de d&eacute;monstration.</p>
+  </footer>
+</body>
+</html>
