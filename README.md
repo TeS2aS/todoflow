@@ -1,12 +1,12 @@
 # TodoFlow SaaS Todo App
 
-Application full-stack de gestion de taches avec API Express/MongoDB, JWT, refresh tokens, dashboard moderne, mode offline et assistant heuristique local.
+Application full-stack de gestion de taches avec API Express/MongoDB, JWT, refresh tokens, dashboard moderne, mode offline, reset password SMTP, assistants personnalisables, chat, groupes prives et GameZone V1.
 
 ## Stack
 
 - Backend: Node.js, Express, MongoDB, Mongoose
 - Securite: Helmet, CORS strict, rate limiting memoire, validation stricte, erreurs centralisees
-- Authentification: JWT court, refresh token hache, bcrypt, reset password mock
+- Authentification: JWT court, refresh token hache, bcrypt, reset password reel par SMTP
 - Frontend: HTML, CSS, JavaScript sans dependance externe
 - Offline: Service Worker + cache localStorage + file d'attente de synchronisation
 
@@ -33,13 +33,15 @@ frontend/
 
 ## Fonctionnalites principales
 
-- Auth avancee: access token, refresh token, expiration automatique, logout et reset password avec email mock en developpement.
+- Auth avancee: access token, refresh token, expiration automatique, logout et reset password SMTP avec token hache et expiration 15 minutes.
 - Securite API: Helmet, CORS limite, rate limiting global et auth, rejet des cles Mongo dangereuses, validation stricte des payloads.
 - Taches enrichies: priorite, date limite, categorie, tags, sous-taches, notes, ordre manuel et historique des modifications.
 - Performance: pagination, limites de page, indexes MongoDB orientes utilisateur/statut/priorite/date, requetes `lean` pour les listes.
 - Dashboard: total, terminees, productivite, retard, barres de progression et filtres avances.
 - UX: edition inline auto-save, drag and drop, confirmation suppression, toasts, loading state, responsive mobile et dark mode.
-- IA locale: suggestions, reformulation, priorisation heuristique et analyse d'habitudes sans appel externe.
+- Assistants: Mambo, Kratos et custom avec suggestions, reformulation, priorisation heuristique et analyse d'habitudes sans appel externe.
+- Social V1: chat general, groupes prives, invitations par code/email et chat de groupe.
+- GameZone V1: Speed Tasks Battle en REST avec polling, votes et classement.
 - Notifications: notifications locales navigateur et routes preparees pour push Web Push.
 - Bonus: themes clair/sombre, export JSON, service worker, cache offline et synchronisation au retour online.
 
@@ -68,6 +70,40 @@ Routes protegees par JWT:
 - `GET /tasks/ai/analysis`
 - `GET /notifications/config`
 - `POST /notifications/subscribe`
+- `GET /assistants`
+- `GET /assistants/me`
+- `POST /assistants/select`
+- `POST /assistants/custom`
+- `PATCH /assistants/me`
+- `POST /assistants/message`
+- `POST /assistants/rewrite-task`
+- `GET /assistants/daily`
+- `GET /chat/messages`
+- `POST /chat/messages`
+- `DELETE /chat/messages/:id`
+- `POST /chat/messages/:id/reactions`
+- `POST /groups`
+- `GET /groups`
+- `GET /groups/:id`
+- `PATCH /groups/:id`
+- `DELETE /groups/:id`
+- `POST /groups/:id/invite`
+- `POST /groups/join`
+- `GET /groups/:id/members`
+- `PATCH /groups/:id/members/:userId`
+- `DELETE /groups/:id/members/:userId`
+- `GET /groups/:id/messages`
+- `POST /groups/:id/messages`
+- `POST /game/rooms`
+- `POST /game/rooms/join`
+- `GET /game/rooms/:code`
+- `POST /game/rooms/:code/ready`
+- `POST /game/rooms/:code/start`
+- `POST /game/rooms/:code/submissions`
+- `GET /game/rooms/:code/submissions`
+- `POST /game/rooms/:code/votes`
+- `GET /game/rooms/:code/results`
+- `POST /game/rooms/:code/finish`
 
 Le token d'acces doit etre envoye avec:
 
@@ -104,6 +140,17 @@ RATE_LIMIT_MAX=300
 MONGO_CONNECT_RETRIES=3
 MONGO_CONNECT_RETRY_DELAY_MS=2000
 VAPID_PUBLIC_KEY=
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=
+SMTP_PASS=
+EMAIL_FROM=
+RESET_PASSWORD_URL=https://todoflow-alpha.vercel.app/reset-password.html
+GIPHY_API_KEY=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 ```
 
 4. Lancer MongoDB localement.
@@ -125,6 +172,34 @@ npm start
 ```text
 http://localhost:5000
 ```
+
+## Reset password SMTP
+
+Le reset password utilise Nodemailer en SMTP. Le backend genere un token aleatoire, stocke uniquement son hash SHA-256 en base, expire le token apres 15 minutes, puis envoie un lien vers `RESET_PASSWORD_URL`.
+
+Variables requises pour un envoi reel:
+
+```env
+SMTP_HOST=smtp.votre-provider.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=votre_user
+SMTP_PASS=votre_mot_de_passe_ou_app_password
+EMAIL_FROM=TodoFlow <no-reply@votre-domaine.com>
+RESET_PASSWORD_URL=https://todoflow-alpha.vercel.app/reset-password.html
+```
+
+En developpement, si SMTP n'est pas configure, le serveur affiche un warning clair et ne crash pas. La reponse reste generique pour ne pas reveler si l'email existe. En production, configurez SMTP sur Render avant de promettre le reset password aux utilisateurs.
+
+Test manuel rapide:
+
+1. Cliquer `Mot de passe oublie`.
+2. Saisir l'email du compte.
+3. Ouvrir l'email recu.
+4. Utiliser le lien `reset-password.html?token=...`.
+5. Saisir un nouveau mot de passe avec majuscule, minuscule et chiffre.
+6. Se reconnecter avec le nouveau mot de passe.
+7. Reutiliser le lien: il doit etre refuse.
 
 ## Connexion MongoDB Atlas
 
@@ -248,6 +323,17 @@ RATE_LIMIT_MAX=300
 MONGO_CONNECT_RETRIES=3
 MONGO_CONNECT_RETRY_DELAY_MS=2000
 VAPID_PUBLIC_KEY=
+SMTP_HOST=votre.smtp.host
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=votre_user_smtp
+SMTP_PASS=votre_secret_smtp
+EMAIL_FROM=TodoFlow <no-reply@votre-domaine.com>
+RESET_PASSWORD_URL=https://todoflow-alpha.vercel.app/reset-password.html
+GIPHY_API_KEY=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 ```
 
 Option B, via Blueprint:
@@ -295,6 +381,7 @@ Apres le premier deploy Vercel:
 
 ```env
 CLIENT_URL=https://todoflow.vercel.app
+RESET_PASSWORD_URL=https://todoflow.vercel.app/reset-password.html
 ```
 
 - Redeployer Render.
@@ -344,10 +431,13 @@ Si le frontend affiche un mode offline permanent:
 6. Activer le dark mode, puis rafraichir pour verifier la persistance.
 7. Couper le reseau, creer ou modifier une tache, puis revenir online pour verifier la synchronisation.
 8. Cliquer sur "Notifications" et creer une tache avec echeance proche.
-9. Tester "Mot de passe oublie"; en developpement, le token mock est renvoye dans la reponse et pre-rempli.
-10. Utiliser l'assistant pour suggerer, reformuler, prioriser et analyser le planning.
-11. Avec Atlas, verifier dans Data Explorer que `todo_app.users` et `todo_app.tasks` sont creees apres les tests UI.
-12. Tester une erreur reseau en retirant temporairement ton IP Atlas, puis verifier que les retries et le message d'erreur sont explicites.
+9. Tester "Mot de passe oublie" avec SMTP configure, recevoir l'email, ouvrir `reset-password.html`, changer le mot de passe puis verifier que le token ne peut pas etre reutilise.
+10. Utiliser Mambo, Kratos puis un assistant custom pour suggerer, reformuler, prioriser et analyser le planning.
+11. Tester le chat general: texte, lien, emoji, image URL, GIF URL, reaction et suppression.
+12. Tester les groupes: creation, photo URL, invitation, join code, membres, chat groupe, quitter et supprimer.
+13. Tester GameZone: creer room, rejoindre, ready, start, submit, vote, results.
+14. Avec Atlas, verifier dans Data Explorer que `todo_app.users`, `tasks`, `assistantprofiles`, `chatmessages`, `groups`, `groupmembers`, `gamerooms`, `gameplayers`, `gamesubmissions` et `gamevotes` recoivent les donnees.
+15. Tester une erreur reseau en retirant temporairement ton IP Atlas, puis verifier que les retries et le message d'erreur sont explicites.
 
 ## Verification syntaxique
 
@@ -357,8 +447,15 @@ Les fichiers JavaScript peuvent etre verifies avec:
 node --check backend/server.js
 node --check backend/config/db.js
 node --check backend/services/authService.js
+node --check backend/services/emailService.js
+node --check backend/services/assistantService.js
+node --check backend/services/chatService.js
+node --check backend/services/groupService.js
+node --check backend/services/gameService.js
 node --check backend/services/taskService.js
 node --check frontend/app.js
+node --check frontend/social.js
+node --check frontend/reset-password.js
 ```
 
 ## Notes production
@@ -367,5 +464,5 @@ node --check frontend/app.js
 - Servir l'application en HTTPS pour notifications, service worker et push.
 - Remplacer le rate limiter memoire par Redis si plusieurs instances backend.
 - Persister les abonnements push dans une collection MongoDB dediee.
-- Brancher un vrai fournisseur email pour le reset password.
+- Surveiller les erreurs SMTP et utiliser un fournisseur email fiable pour le reset password.
 - Restreindre `CLIENT_URL` au domaine de production.

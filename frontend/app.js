@@ -215,6 +215,28 @@ function validatePassword(password) {
   return '';
 }
 
+function validateStrongPassword(password) {
+  const errors = [];
+
+  if (password.length < 8 || password.length > 72) {
+    errors.push('8 a 72 caracteres');
+  }
+
+  if (!/[a-z]/.test(password)) {
+    errors.push('une minuscule');
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    errors.push('une majuscule');
+  }
+
+  if (!/\d/.test(password)) {
+    errors.push('un chiffre');
+  }
+
+  return errors.length ? `Mot de passe requis: ${errors.join(', ')}.` : '';
+}
+
 function setText(element, value) {
   element.textContent = value;
 }
@@ -387,6 +409,12 @@ function renderSession() {
   elements.dashboardView.classList.toggle('hidden', !isAuthenticated);
   elements.logoutButton.classList.toggle('hidden', !isAuthenticated);
   elements.userEmail.textContent = isAuthenticated ? state.user.email : '';
+  window.dispatchEvent(new CustomEvent('todoflow:session', {
+    detail: {
+      authenticated: isAuthenticated,
+      user: state.user
+    }
+  }));
 }
 
 function applyTheme() {
@@ -1100,11 +1128,13 @@ async function forgotPassword() {
       method: 'POST',
       body: JSON.stringify({ email })
     }, { skipRefresh: true });
-    elements.resetPanel.classList.remove('hidden');
 
-    if (response.mockEmail?.resetUrl) {
-      const url = new URL(response.mockEmail.resetUrl);
-      elements.resetToken.value = url.searchParams.get('resetToken') || '';
+    if (response.debugResetUrl) {
+      const url = new URL(response.debugResetUrl);
+      elements.resetToken.value = url.searchParams.get('token') || url.searchParams.get('resetToken') || '';
+      elements.resetPanel.classList.remove('hidden');
+      setStatus(elements.authStatus, `${response.message}. Mode dev: lien de test disponible.`, 'success');
+      return;
     }
 
     setStatus(elements.authStatus, response.message, 'success');
@@ -1116,7 +1146,7 @@ async function forgotPassword() {
 async function resetPassword() {
   const token = normalizeText(elements.resetToken.value);
   const password = elements.resetPassword.value;
-  const passwordError = validatePassword(password);
+  const passwordError = validateStrongPassword(password);
 
   if (!token || passwordError) {
     setStatus(elements.authStatus, passwordError || 'Token requis.', 'error');
@@ -1454,7 +1484,7 @@ function registerServiceWorker() {
 
 function hydrateResetTokenFromUrl() {
   const params = new URLSearchParams(window.location.search);
-  const token = params.get('resetToken');
+  const token = params.get('token') || params.get('resetToken');
 
   if (token) {
     elements.resetToken.value = token;

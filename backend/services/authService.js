@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 
+const emailService = require('./emailService');
 const User = require('../models/User');
 const ApiError = require('../utils/apiError');
 const {
@@ -12,10 +13,14 @@ const {
 } = require('../utils/tokens');
 const {
   normalizeEmail,
-  validateAuthInput
+  validateAuthInput,
+  validatePasswordStrength
 } = require('../utils/validators');
 
 const MAX_REFRESH_TOKENS = 5;
+const PASSWORD_RESET_RESPONSE = {
+  message: 'If the account exists, a reset email has been sent'
+};
 
 function toUserPayload(user) {
   return {
@@ -133,9 +138,7 @@ async function requestPasswordReset(rawEmail) {
   const user = await User.findOne({ email }).select('+passwordResetTokenHash +passwordResetExpiresAt');
 
   if (!user) {
-    return {
-      message: 'If the account exists, a reset email has been prepared'
-    };
+    return PASSWORD_RESET_RESPONSE;
   }
 
   const resetToken = createPasswordResetToken();
@@ -143,27 +146,33 @@ async function requestPasswordReset(rawEmail) {
   user.passwordResetExpiresAt = getPasswordResetExpiryDate();
   await user.save();
 
-  const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5000'}?resetToken=${resetToken}`;
+  const resetUrl = emailService.getResetPasswordUrl(resetToken);
+  let emailResult = null;
 
-  const response = {
-    message: 'If the account exists, a reset email has been prepared',
-    mockEmail: process.env.NODE_ENV === 'production' ? undefined : {
+  try {
+    emailResult = await emailService.sendPasswordResetEmail({
       to: user.email,
-      subject: 'Reset your TodoFlow password',
       resetUrl,
       expiresInMinutes: 15
-    }
-  };
-
-  if (!response.mockEmail) {
-    delete response.mockEmail;
+    });
+  } catch (error) {
+    const reason = error && error.message ? error.message : 'unknown SMTP error';
+    const safeReason = process.env.NODE_ENV === 'production'
+      ? reason.replace(/[A-Fa-f0-9]{32,}/g, '[redacted-token]')
+      : reason;
+    console.error(`[email] Password reset email failed for user ${user._id}: ${safeReason}`);
   }
 
-  return response;
+  return {
+    ...PASSWORD_RESET_RESPONSE,
+    ...(process.env.NODE_ENV === 'production' ? {} : {
+      debugResetUrl: emailResult?.debugResetUrl
+    })
+  };
 }
 
 async function resetPassword({ token, password }) {
-  const errors = validateAuthInput('user@example.com', password).filter((error) => !error.includes('email'));
+  const errors = validatePasswordStrength(password);
 
   if (!token || typeof token !== 'string') {
     errors.push('Reset token is required');

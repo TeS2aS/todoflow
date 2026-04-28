@@ -6,8 +6,13 @@ const cors = require('cors');
 const helmet = require('helmet');
 
 const connectDB = require('./config/db');
+const assistantRoutes = require('./routes/assistantRoutes');
 const authRoutes = require('./routes/authRoutes');
+const chatRoutes = require('./routes/chatRoutes');
+const gameRoutes = require('./routes/gameRoutes');
+const groupRoutes = require('./routes/groupRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const roomRoutes = require('./routes/roomRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const createRateLimiter = require('./middleware/rateLimiter');
@@ -80,6 +85,11 @@ app.get('/health', (req, res) => {
 app.use('/', authRoutes);
 app.use('/tasks', taskRoutes);
 app.use('/notifications', notificationRoutes);
+app.use('/assistants', assistantRoutes);
+app.use('/chat', chatRoutes);
+app.use('/groups', groupRoutes);
+app.use('/rooms', roomRoutes);
+app.use('/', gameRoutes);
 
 app.use(express.static(path.join(__dirname, '../frontend')));
 

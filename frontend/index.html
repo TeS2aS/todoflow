@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="styles.css">
   <script src="env.js" defer></script>
   <script src="app.js" defer></script>
+  <script src="social.js" defer></script>
 </head>
 <body>
   <header class="app-header">
@@ -49,6 +50,7 @@
 
         <button id="authSubmit" class="primary-button" type="submit">Se connecter</button>
         <button id="forgotPasswordButton" class="link-button" type="button">Mot de passe oublie</button>
+        <a class="link-button" href="reset-password.html">J'ai deja un lien de reset</a>
 
         <div id="resetPanel" class="reset-panel hidden">
           <div class="field">
@@ -67,6 +69,17 @@
     </section>
 
     <section id="dashboardView" class="dashboard hidden" aria-labelledby="dashboardTitle">
+      <div class="feature-nav" aria-label="Navigation TodoFlow">
+        <button class="feature-tab active" type="button" data-feature-target="tasksSection">Dashboard</button>
+        <button class="feature-tab" type="button" data-feature-target="tasksSection">Taches</button>
+        <button class="feature-tab" type="button" data-feature-target="assistantSection">Assistant</button>
+        <button class="feature-tab" type="button" data-feature-target="chatSection">Chat</button>
+        <button class="feature-tab" type="button" data-feature-target="groupsSection">Groupes</button>
+        <button class="feature-tab" type="button" data-feature-target="gameSection">GameZone</button>
+        <button class="feature-tab" type="button" data-feature-target="profileSection">Profil</button>
+      </div>
+
+      <section id="tasksSection" class="feature-section active" aria-labelledby="dashboardTitle">
       <div class="dashboard-header">
         <div>
           <p class="eyebrow">Dashboard</p>
@@ -108,6 +121,7 @@
               <p class="eyebrow">Assistant</p>
               <button id="aiSuggestButton" class="secondary-button" type="button">Suggester</button>
             </div>
+            <div id="dashboardAssistantBadge" class="assistant-badge"></div>
             <textarea id="aiInput" rows="3" maxlength="120" placeholder="Tache a reformuler ou prioriser"></textarea>
             <div class="button-row">
               <button id="aiRewriteButton" class="ghost-button" type="button">Reformuler</button>
@@ -201,6 +215,237 @@
           <p id="emptyState" class="empty-state hidden">Aucune tache a afficher.</p>
         </section>
       </div>
+      </section>
+
+      <section id="assistantSection" class="feature-section hidden" aria-labelledby="assistantTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Assistant</p>
+            <h2 id="assistantTitle">Coach personnel</h2>
+          </div>
+          <button id="assistantDailyButton" class="secondary-button" type="button">Message du jour</button>
+        </div>
+        <div class="assistant-grid">
+          <article class="choice-card" data-assistant-card="mambo">
+            <div class="assistant-avatar">M</div>
+            <h3>Mambo</h3>
+            <p>Coach drole, energique et bienveillant.</p>
+            <button class="primary-button" type="button" data-assistant-select="mambo">Choisir</button>
+          </article>
+          <article class="choice-card" data-assistant-card="kratos">
+            <div class="assistant-avatar">K</div>
+            <h3>Kratos</h3>
+            <p>Direct, strict et discipline.</p>
+            <button class="primary-button" type="button" data-assistant-select="kratos">Choisir</button>
+          </article>
+          <form id="customAssistantForm" class="choice-card custom-form">
+            <div class="assistant-avatar" id="customAssistantPreview">AI</div>
+            <h3>Custom</h3>
+            <div class="field">
+              <label for="assistantName">Nom</label>
+              <input id="assistantName" maxlength="40" placeholder="Nova">
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="assistantColor">Couleur</label>
+                <input id="assistantColor" type="color" value="#0b7a75">
+              </div>
+              <div class="field">
+                <label for="assistantTone">Ton</label>
+                <select id="assistantTone">
+                  <option value="drole">Drole</option>
+                  <option value="strict">Strict</option>
+                  <option value="calme">Calme</option>
+                  <option value="professionnel">Professionnel</option>
+                  <option value="sarcastique_soft">Sarcastique soft</option>
+                  <option value="coach_sportif">Coach sportif</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="assistantGoals">Objectifs</label>
+              <input id="assistantGoals" maxlength="120" placeholder="productivite, motivation, organisation">
+            </div>
+            <div class="field">
+              <label for="assistantCatchphrases">Phrases favorites</label>
+              <textarea id="assistantCatchphrases" rows="2" maxlength="260" placeholder="Une phrase par ligne"></textarea>
+            </div>
+            <div class="field">
+              <label for="assistantIntensity">Intensite</label>
+              <input id="assistantIntensity" type="range" min="1" max="5" value="3">
+            </div>
+            <button class="primary-button" type="submit">Sauvegarder</button>
+          </form>
+        </div>
+        <div class="tool-panel">
+          <div class="field">
+            <label for="assistantTestInput">Tester mon assistant</label>
+            <input id="assistantTestInput" maxlength="120" placeholder="Preparer la demo client">
+          </div>
+          <div class="button-row">
+            <button id="assistantTestButton" class="secondary-button" type="button">Tester</button>
+            <button id="assistantRewriteButton" class="ghost-button" type="button">Reformuler</button>
+          </div>
+          <div id="assistantOutput" class="ai-result" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="chatSection" class="feature-section hidden" aria-labelledby="chatTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Chat</p>
+            <h2 id="chatTitle">General</h2>
+          </div>
+          <button id="chatRefreshButton" class="secondary-button" type="button">Actualiser</button>
+        </div>
+        <div id="chatMessages" class="chat-feed" aria-live="polite"></div>
+        <form id="chatForm" class="composer">
+          <select id="chatType" aria-label="Type de message">
+            <option value="text">Texte</option>
+            <option value="image">Image URL</option>
+            <option value="gif">GIF URL</option>
+          </select>
+          <textarea id="chatInput" maxlength="600" rows="2" placeholder="Message, lien, emoji ou URL"></textarea>
+          <button class="primary-button" type="submit">Envoyer</button>
+        </form>
+        <p id="chatStatus" class="status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section id="groupsSection" class="feature-section hidden" aria-labelledby="groupsTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Groupes</p>
+            <h2 id="groupsTitle">Espaces prives</h2>
+          </div>
+          <button id="groupsRefreshButton" class="secondary-button" type="button">Actualiser</button>
+        </div>
+        <div class="split-layout">
+          <div class="tool-panel">
+            <form id="groupCreateForm">
+              <div class="field">
+                <label for="groupName">Nom du groupe</label>
+                <input id="groupName" maxlength="80" required>
+              </div>
+              <div class="field">
+                <label for="groupDescription">Description</label>
+                <textarea id="groupDescription" maxlength="240" rows="2"></textarea>
+              </div>
+              <div class="field">
+                <label for="groupAvatarUrl">Photo URL</label>
+                <input id="groupAvatarUrl" maxlength="500" placeholder="https://...">
+              </div>
+              <button class="primary-button" type="submit">Creer</button>
+            </form>
+            <form id="groupJoinForm" class="inline-form">
+              <label for="groupInviteCode">Code invitation</label>
+              <input id="groupInviteCode" maxlength="12">
+              <button class="secondary-button" type="submit">Rejoindre</button>
+            </form>
+            <div id="groupsList" class="stack-list"></div>
+          </div>
+          <div id="groupDetailPanel" class="tool-panel hidden">
+            <div class="group-title-row">
+              <img id="groupAvatarPreview" class="group-avatar hidden" alt="">
+              <div>
+                <h3 id="activeGroupName">Groupe</h3>
+                <p id="activeGroupMeta" class="status"></p>
+              </div>
+            </div>
+            <form id="groupEditForm" class="inline-form">
+              <label for="groupEditAvatarUrl">Photo URL</label>
+              <input id="groupEditAvatarUrl" maxlength="500">
+              <button class="secondary-button" type="submit">Modifier</button>
+            </form>
+            <form id="groupInviteForm" class="inline-form">
+              <label for="groupInviteEmail">Inviter par email</label>
+              <input id="groupInviteEmail" type="email" maxlength="120">
+              <button class="secondary-button" type="submit">Inviter</button>
+            </form>
+            <div id="groupMembers" class="stack-list"></div>
+            <div id="groupMessages" class="chat-feed compact" aria-live="polite"></div>
+            <form id="groupMessageForm" class="composer">
+              <select id="groupMessageType" aria-label="Type de message groupe">
+                <option value="text">Texte</option>
+                <option value="image">Image URL</option>
+                <option value="gif">GIF URL</option>
+              </select>
+              <input id="groupMessageInput" maxlength="600" placeholder="Message de groupe">
+              <button class="primary-button" type="submit">Envoyer</button>
+            </form>
+            <div class="button-row">
+              <button id="groupLeaveButton" class="ghost-button danger" type="button">Quitter</button>
+              <button id="groupDeleteButton" class="ghost-button danger" type="button">Supprimer</button>
+            </div>
+          </div>
+        </div>
+        <p id="groupsStatus" class="status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section id="gameSection" class="feature-section hidden" aria-labelledby="gameTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">GameZone</p>
+            <h2 id="gameTitle">Speed Tasks Battle</h2>
+          </div>
+          <button id="gameRefreshButton" class="secondary-button" type="button">Actualiser</button>
+        </div>
+        <div class="split-layout">
+          <div class="tool-panel">
+            <form id="gameCreateForm">
+              <div class="field">
+                <label for="gameNickname">Pseudo</label>
+                <input id="gameNickname" maxlength="32">
+              </div>
+              <div class="field">
+                <label for="gameTheme">Theme</label>
+                <input id="gameTheme" maxlength="120" value="Idees de taches utiles pour demain">
+              </div>
+              <button class="primary-button" type="submit">Creer une partie</button>
+            </form>
+            <form id="gameJoinForm" class="inline-form">
+              <label for="gameRoomCode">Code room</label>
+              <input id="gameRoomCode" maxlength="8">
+              <button class="secondary-button" type="submit">Rejoindre</button>
+            </form>
+          </div>
+          <div id="gameRoomPanel" class="tool-panel hidden">
+            <div class="game-topline">
+              <div>
+                <h3 id="activeGameCode">Room</h3>
+                <p id="activeGameTheme" class="status"></p>
+              </div>
+              <strong id="gameTimerValue" class="timer-pill">60s</strong>
+            </div>
+            <div id="gamePlayers" class="stack-list"></div>
+            <div class="button-row">
+              <button id="gameReadyButton" class="secondary-button" type="button">Pret</button>
+              <button id="gameStartButton" class="primary-button" type="button">Lancer</button>
+              <button id="gameFinishButton" class="ghost-button" type="button">Resultats</button>
+            </div>
+            <form id="gameSubmissionForm" class="composer hidden">
+              <input id="gameSubmissionInput" maxlength="140" placeholder="Une idee de tache">
+              <button class="primary-button" type="submit">Soumettre</button>
+            </form>
+            <div id="gameSubmissions" class="stack-list"></div>
+            <div id="gameVoteBoard" class="vote-board"></div>
+            <div id="gameResults" class="result-board"></div>
+          </div>
+        </div>
+        <p id="gameStatus" class="status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section id="profileSection" class="feature-section hidden" aria-labelledby="profileTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Profil</p>
+            <h2 id="profileTitle">Compte</h2>
+          </div>
+        </div>
+        <div class="tool-panel">
+          <p id="profileEmail" class="profile-line"></p>
+          <a class="secondary-button" href="reset-password.html">Changer mon mot de passe</a>
+        </div>
+      </section>
     </section>
   </main>
 
