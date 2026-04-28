@@ -1,3 +1,11 @@
+console.log("SMTP CONFIG:", {
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  user: process.env.SMTP_USER
+});
+
+console.log("Sending email to:", to);
+
 let nodemailer = null;
 
 function parseBoolean(value) {
